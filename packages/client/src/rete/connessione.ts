@@ -30,6 +30,8 @@ export function chiudiHost(): void {
 /** Crea una stanza nuova (il Master è già seduto al tavolo) e restituisce codice e token del Master. */
 export async function creaStanza(nomeMaster: string): Promise<StanzaCreata> {
   const stanza = Stanza.nuova(nomeMaster);
+  // Le parole uscite nelle serate precedenti su questo telefono non vengono ripescate subito.
+  stanza.ricordaCoppie(await archivioIdb.coppieUsate().catch(() => []));
   const h = new HostLocale(stanza, archivioIdb);
   await h.salvaSubito();
   await avviaHost(h);
@@ -41,7 +43,9 @@ export async function trasportoMaster(codice: string): Promise<Trasporto | null>
   if (host?.host.codice === codice) return host.host;
   const dati = await archivioIdb.caricaPartita(codice);
   if (!dati) return null;
-  return avviaHost(new HostLocale(Stanza.deserializza(dati), archivioIdb));
+  const stanza = Stanza.deserializza(dati);
+  stanza.ricordaCoppie(await archivioIdb.coppieUsate().catch(() => []));
+  return avviaHost(new HostLocale(stanza, archivioIdb));
 }
 
 /** Il trasporto per un giocatore che entra nella stanza `codice`. */

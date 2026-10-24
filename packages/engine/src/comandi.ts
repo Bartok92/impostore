@@ -200,7 +200,7 @@ function esegui(s: StatoStanza, attore: Attore, c: Comando, ctx: Contesto): stri
 function scegliCoppia(s: StatoStanza, casuale: Casuale) {
   // "Casuale" pesca da tutte le categorie tranne quelle per adulti, che vanno scelte apposta.
   const cats = s.impostazioni.categoria === 'casuale' ? CATEGORIE.filter((c) => !c.adulti) : [categoria(s.impostazioni.categoria)];
-  const tutte = cats.flatMap((c) => c.coppie.map((coppia, i) => ({ cat: c.id, id: idCoppia(c.id, i), coppia })));
+  const tutte = cats.flatMap((c) => c.coppie.map((coppia) => ({ cat: c.id, id: idCoppia(c.id, coppia), coppia })));
   let libere = tutte.filter((x) => !s.coppieUsate.includes(x.id));
   if (libere.length === 0) {
     // Finite le parole di questa categoria: si ricomincia a pescarle tutte.

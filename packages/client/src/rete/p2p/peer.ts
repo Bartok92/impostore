@@ -2,6 +2,7 @@ import Peer, { type DataConnection } from 'peerjs';
 import type { Canale, CanaleVersoHost } from '../trasporto';
 import { idPeerDelCodice, type HostLocale } from './host';
 import type { Connettore } from './ospite';
+import { Ritardo } from './ritardo';
 
 // Collegamento diretto tra telefoni (WebRTC) tramite PeerJS.
 // Il servizio pubblico gratuito di PeerJS serve solo a "presentarsi"; poi i dati viaggiano da telefono a telefono.
@@ -38,33 +39,46 @@ export function apriTavolo(host: HostLocale): () => void {
   let peer: Peer | null = null;
   let chiuso = false;
   let tentativo: ReturnType<typeof setTimeout> | undefined;
+  const ritardo = new Ritardo(3000);
+  // Mai riprovare subito: si aspetta sempre di più (vedi Ritardo), poi si riprova una volta sola.
+  const programma = (f: () => void) => {
+    clearTimeout(tentativo);
+    tentativo = setTimeout(f, ritardo.prossimo());
+  };
 
   const avvia = () => {
     if (chiuso) return;
     const p = new Peer(idPeerDelCodice(host.codice), { debug: 1 });
     peer = p;
-    p.on('open', () => host.impostaReteAperta(true));
+    p.on('open', () => {
+      ritardo.azzera();
+      host.impostaReteAperta(true);
+    });
     p.on('connection', (conn) => conn.on('open', () => host.accogli(canaleDa(conn))));
     p.on('disconnected', () => {
       host.impostaReteAperta(false);
-      if (!chiuso && !p.destroyed) p.reconnect();
+      programma(() => !chiuso && !p.destroyed && p.disconnected && p.reconnect());
     });
     p.on('error', (e) => {
       if (!ERRORI_DA_RIPROVARE.includes(e.type)) return;
       host.impostaReteAperta(false);
       // 'unavailable-id': il nome è ancora occupato dalla sessione precedente (pagina ricaricata): riprovo tra poco.
       p.destroy();
-      clearTimeout(tentativo);
-      tentativo = setTimeout(avvia, 3000);
+      programma(avvia);
     });
   };
   avvia();
 
-  // Tornando in primo piano (telefono sbloccato) si controlla che il tavolo sia ancora aperto.
+  // Tornando in primo piano (telefono sbloccato) si controlla subito che il tavolo sia ancora aperto.
   const visibilita = () => {
     if (document.visibilityState !== 'visible' || chiuso || !peer) return;
-    if (peer.destroyed) avvia();
-    else if (peer.disconnected) peer.reconnect();
+    if (peer.destroyed) {
+      clearTimeout(tentativo);
+      avvia();
+    } else if (peer.disconnected) {
+      clearTimeout(tentativo);
+      peer.reconnect();
+    }
   };
   document.addEventListener('visibilitychange', visibilita);
 
@@ -78,11 +92,16 @@ export function apriTavolo(host: HostLocale): () => void {
 }
 
 let peerOspite: Promise<Peer> | null = null;
+const ritardoOspite = new Ritardo(3000);
+let attesaOspite: ReturnType<typeof setTimeout> | undefined;
 
 function prendiPeerOspite(): Promise<Peer> {
   peerOspite ??= new Promise<Peer>((ok, ko) => {
     const p = new Peer({ debug: 1 });
-    p.on('open', () => ok(p));
+    p.on('open', () => {
+      ritardoOspite.azzera();
+      ok(p);
+    });
     p.on('error', (e) => {
       if (p.open) return;
       peerOspite = null;
@@ -90,7 +109,8 @@ function prendiPeerOspite(): Promise<Peer> {
       ko(new Error(e.type === 'browser-incompatible' ? 'Questo browser non supporta il collegamento diretto.' : 'Nessuna connessione a internet.'));
     });
     p.on('disconnected', () => {
-      if (!p.destroyed) p.reconnect();
+      clearTimeout(attesaOspite);
+      attesaOspite = setTimeout(() => !p.destroyed && p.disconnected && p.reconnect(), ritardoOspite.prossimo());
     });
   });
   return peerOspite;

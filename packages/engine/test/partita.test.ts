@@ -120,6 +120,25 @@ describe('carte e segreti', () => {
     }
   });
 
+  it('una stanza nuova evita le coppie già uscite nelle serate precedenti', () => {
+    const ieri = tavolo(['Giulia', 'Luca', 'Marco'], { categoria: 'animali' }, 7);
+    for (let i = 0; i < 60; i++) {
+      ieri.master({ tipo: 'avviaPartita' });
+      ieri.master({ tipo: 'tornaAllaLobby' });
+    }
+    const memoria = [...ieri.s.coppieUsate, 'animali:coppia-che-non-esiste-piu'];
+    const oggi = tavolo(['Giulia', 'Luca', 'Marco'], { categoria: 'animali' }, 7);
+    oggi.stanza.ricordaCoppie(memoria);
+    expect(oggi.s.coppieUsate).not.toContain('animali:coppia-che-non-esiste-piu');
+    for (let i = 0; i < 40; i++) {
+      oggi.master({ tipo: 'avviaPartita' });
+      expect(ieri.s.coppieUsate).not.toContain(oggi.p.coppia);
+      oggi.master({ tipo: 'tornaAllaLobby' });
+    }
+    // Finite le parole della categoria si ricomincia da capo, senza bloccarsi.
+    for (let i = 0; i < 20; i++) expect(oggi.master({ tipo: 'avviaPartita' }).ok && oggi.master({ tipo: 'tornaAllaLobby' }).ok).toBe(true);
+  });
+
   it('le coppie di parole non si ripetono nella stessa stanza', () => {
     const t = tavolo(['Giulia', 'Luca', 'Marco'], { categoria: 'sport' });
     const viste = new Set<string>();

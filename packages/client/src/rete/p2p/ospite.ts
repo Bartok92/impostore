@@ -1,5 +1,6 @@
 import type { Comando, Esito, MessaggioHost, RispostaEntra } from '@impostore/engine';
 import { Emettitore, type Ascoltatori, type CanaleVersoHost, type DatiIngresso, type Trasporto } from '../trasporto';
+import { Ritardo } from './ritardo';
 
 // Il telefono di un amico: si collega direttamente al telefono del Master.
 // Se la connessione cade (schermo bloccato, rete ballerina) ci riprova da solo.
@@ -18,10 +19,12 @@ export class TrasportoOspite implements Trasporto {
   private coda: (() => void)[] = [];
   private chiuso = false;
   private riprova: ReturnType<typeof setTimeout> | null = null;
+  private ritardo: Ritardo;
   /** Ultimo motivo per cui non si riesce a collegarsi (per l'interfaccia). */
   ultimoErrore: string | null = null;
 
-  constructor(private codice: string, private connetti: Connettore, private riprovaMs = RIPROVA_MS) {
+  constructor(private codice: string, private connetti: Connettore, riprovaMs = RIPROVA_MS) {
+    this.ritardo = new Ritardo(riprovaMs);
     void this.collega();
   }
 
@@ -41,6 +44,7 @@ export class TrasportoOspite implements Trasporto {
       if (this.chiuso) return canale.chiudi();
       this.canale = canale;
       this.ultimoErrore = null;
+      this.ritardo.azzera();
       canale.suMessaggio((m) => this.suMessaggio(m));
       canale.suChiusura(() => {
         if (this.canale !== canale) return;
@@ -59,10 +63,11 @@ export class TrasportoOspite implements Trasporto {
 
   private programmaRiprova(): void {
     if (this.chiuso || this.riprova) return;
+    // Attese sempre più lunghe: se il Master è irraggiungibile non si martella il server.
     this.riprova = setTimeout(() => {
       this.riprova = null;
       void this.collega();
-    }, this.riprovaMs);
+    }, this.ritardo.prossimo());
   }
 
   private suMessaggio(m: MessaggioHost): void {

@@ -41,9 +41,7 @@ export function SchermoGioco({ pacchetto }: { pacchetto: PacchettoVista }) {
 
 /** Riga in alto durante la partita: a che punto siamo, la propria carta, il menu del Master. */
 export function BarraPartita({ v, titolo }: { v: PacchettoVista['vista']; titolo: string }) {
-  const invia = useApp((s) => s.invia);
   const [carta, setCarta] = useState(false);
-  const [menu, setMenu] = useState(false);
   const p = v.partita!;
   return (
     <div className="flex items-center justify-between gap-2">
@@ -58,29 +56,40 @@ export function BarraPartita({ v, titolo }: { v: PacchettoVista['vista']; titolo
             <IconaOcchio size={16} /> Parola
           </button>
         )}
-        {v.master && (
-          <button type="button" aria-label="Menu del Master" onClick={() => setMenu(true)} className="flex h-9 w-9 items-center justify-center rounded-full border-[1.5px] border-bordo">
-            <IconaMenu size={18} />
-          </button>
-        )}
+        {v.master && <MenuMaster />}
       </div>
       <Foglio aperto={carta} onChiudi={() => setCarta(false)} titolo="La tua carta">
         {p.mia && <CartaRuolo carta={p.mia} categoria={p.categoria} compatta />}
         <Pulsante className="mt-4" onClick={() => setCarta(false)}>Nascondi</Pulsante>
       </Foglio>
-      <Foglio aperto={menu} onChiudi={() => setMenu(false)} titolo="Menu del Master">
-        <p className="mb-4 mt-0 text-tenue">Si torna alla stanza d'attesa: la partita in corso si chiude senza punti. Lì puoi cambiare le modalità e far entrare altri amici.</p>
-        <Pulsante
-          variante="corallo"
-          onClick={() => {
-            if (!confirm('Terminare la partita in corso?')) return;
-            setMenu(false);
-            void invia({ tipo: 'tornaAllaLobby' });
-          }}
-        >
-          Termina la partita
-        </Pulsante>
-      </Foglio>
     </div>
+  );
+}
+
+/** Pulsante "⋯" del Master: da qui si termina la partita in corso (in qualsiasi fase). */
+export function MenuMaster() {
+  const invia = useApp((s) => s.invia);
+  const [aperto, setAperto] = useState(false);
+  return (
+    <>
+      <button type="button" aria-label="Menu del Master" onClick={() => setAperto(true)} className="flex h-9 w-9 items-center justify-center rounded-full border-[1.5px] border-bordo">
+        <IconaMenu size={18} />
+      </button>
+      <Foglio aperto={aperto} onChiudi={() => setAperto(false)} titolo="Menu del Master">
+        <p className="mb-4 mt-0 text-tenue">Si torna alla stanza d'attesa: la partita in corso si chiude senza punti. Lì puoi cambiare le modalità e far entrare altri amici.</p>
+        <div className="flex flex-col gap-2.5">
+          <Pulsante
+            variante="corallo"
+            onClick={() => {
+              setAperto(false);
+              void invia({ tipo: 'tornaAllaLobby' });
+            }}
+          >
+            Termina la partita
+          </Pulsante>
+          <Pulsante variante="contornoTesto" onClick={() => setAperto(false)}>Continua a giocare</Pulsante>
+        </div>
+      </Foglio>
+    </>
   );
 }

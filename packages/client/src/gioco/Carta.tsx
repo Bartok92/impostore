@@ -4,6 +4,7 @@ import { Avatar, Pulsante, Schermo } from '../ds/componenti';
 import { IconaFantasma, IconaLampadina, IconaLucchetto, IconaOcchio, IconaOcchioBarrato, IconaSpunta } from '../ds/icone';
 import { useApp } from '../store';
 import { coloreDi, elenco, plurale } from '../utilita';
+import { MenuMaster } from './SchermoGioco';
 
 const STILE: Record<MiaCarta['ruolo'], { sfondo: string; etichetta: string; piede: string }> = {
   detective: { sfondo: 'bg-detective', etichetta: 'DETECTIVE', piede: 'Non mostrarla a nessuno' },
@@ -93,6 +94,7 @@ export function FaseCarta({ v }: { v: Vista }) {
       <span className="flex items-center gap-2 text-[13px] text-tenue">
         <Avatar nome={io.nome} colore={coloreDi(v, io.id)} misura={30} />
         {io.nome}
+        {v.master && <MenuMaster />}
       </span>
     </div>
   );

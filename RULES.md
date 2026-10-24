@@ -34,7 +34,8 @@ Composizione:
 - **Impostore inconsapevole**: l'impostore riceve la parola simile ma la sua carta dice "Detective": non sa di essere l'impostore. Lo scopre solo se viene eliminato.
 - **Indizi a tempo**: ogni giocatore ha N secondi (default 30) per il suo indizio; allo scadere il turno passa. Lo stesso tempo vale per il tentativo di Mr. White.
 - **Doppio giro**: due giri di indizi prima di ogni votazione.
-- **Categoria delle parole**: Cibo, Luoghi, Animali, Oggetti, Mestieri, Sport, Personaggi oppure Casuale. Le coppie di parole già uscite nella stanza non si ripetono finché non sono finite. Quale parola delle due va ai detective è sorteggiato.
+- **Categoria delle parole**: Cibo, Luoghi, Animali, Oggetti, Mestieri, Sport, Personaggi oppure Casuale (circa 100 coppie per categoria). Quale parola delle due va ai detective è sorteggiato.
+- **Niente ripetizioni**: le coppie già uscite non tornano finché la categoria non è finita. Il telefono del Master se le ricorda **anche tra una serata e l'altra** (stanze diverse); quando le parole di una categoria sono finite, si ricomincia da capo.
 - **Sexy & Hot (18+)**: parole maliziose per le serate tra adulti (allusive, non volgari). **Non esce mai con "Casuale"**: il Master deve sceglierla apposta, e tutti vedono l'etichetta 18+ nella stanza d'attesa.
 - **Senza censura (18+)**: parole volgari ed esplicite. Come Sexy & Hot non esce mai con "Casuale"; in più, quando il Master la sceglie, l'app gli chiede di confermare che al tavolo sono tutti maggiorenni e d'accordo.
 - Gli indizi non sono censurati: si può scrivere qualsiasi parola (tranne la propria parola segreta), parolacce comprese.

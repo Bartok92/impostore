@@ -32,13 +32,17 @@ function cavo(): { versoOspite: CanaleVersoOspite; versoHost: CanaleVersoHost; t
   };
 }
 
-function archivioInMemoria(): ArchivioHost & { dati: Map<string, string> } {
+function archivioInMemoria(): ArchivioHost & { dati: Map<string, string>; memoria: string[] } {
   const dati = new Map<string, string>();
-  return {
+  const a = {
     dati,
-    salvaPartita: async (c, d) => void dati.set(c, d),
-    caricaPartita: async (c) => dati.get(c),
+    memoria: [] as string[],
+    salvaPartita: async (c: string, d: string) => void dati.set(c, d),
+    caricaPartita: async (c: string) => dati.get(c),
+    coppieUsate: async () => a.memoria,
+    salvaCoppieUsate: async (ids: string[]) => void (a.memoria = [...ids]),
   };
+  return a;
 }
 
 /** Il telefono di un amico, con l'ultima vista ricevuta. */
@@ -175,11 +179,38 @@ describe('il telefono del Master ospita la stanza', () => {
     expect(stanza.stato.giocatori).toHaveLength(3);
   });
 
+  it('il telefono del Master ricorda le parole uscite anche nella stanza della serata dopo', async () => {
+    const { host, archivio, stanza } = await tavolo(2);
+    await host.comando({ tipo: 'avviaPartita' });
+    await host.salvaSubito();
+    const uscita = stanza.stato.partita!.coppia;
+    expect(archivio.memoria).toContain(uscita);
+    // La serata dopo: stanza nuova sullo stesso telefono.
+    const domani = Stanza.nuova('Giulia', {}, 'Y');
+    domani.ricordaCoppie(await archivio.coppieUsate());
+    expect(domani.stato.coppieUsate).toContain(uscita);
+  });
+
   it('la partita si salva e riparte dall\'archivio', async () => {
     const { host, archivio, stanza } = await tavolo(2);
     await host.comando({ tipo: 'avviaPartita' });
     await host.salvaSubito();
     const ripresa = Stanza.deserializza(archivio.dati.get('X')!);
     expect(ripresa.stato).toEqual(stanza.stato);
+  });
+});
+
+describe('tentativi di collegamento', () => {
+  it('le attese crescono (con un po\' di casualità) fino a un massimo, e si azzerano dopo un collegamento riuscito', async () => {
+    const { Ritardo } = await import('../src/rete/p2p/ritardo');
+    const r = new Ritardo(3000, 60_000);
+    const attese = Array.from({ length: 8 }, () => r.prossimo());
+    expect(attese[0]).toBeGreaterThanOrEqual(2400);
+    expect(attese[0]).toBeLessThanOrEqual(3600);
+    expect(attese[3]).toBeGreaterThanOrEqual(24_000 * 0.8);
+    expect(Math.max(...attese)).toBeLessThanOrEqual(72_000);
+    expect(attese[7]).toBeGreaterThanOrEqual(48_000);
+    r.azzera();
+    expect(r.prossimo()).toBeLessThanOrEqual(3600);
   });
 });

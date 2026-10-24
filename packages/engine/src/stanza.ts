@@ -1,6 +1,7 @@
 import { casualeSicuro } from './casuale.js';
 import { applica, type Comando } from './comandi.js';
 import type { PacchettoVista } from './eventi.js';
+import { coppiaEsiste } from './parole.js';
 import { creaStato, type StatoStanza } from './stato.js';
 import { giocatore, SISTEMA, type Attore, type Casuale, type IdGiocatore } from './tipi.js';
 import { vistaPer } from './viste.js';
@@ -132,6 +133,16 @@ export class Stanza {
   /** Comando dal telefono del Master (che è anche un giocatore). */
   comandoMaster(c: Comando): EsitoComandoStanza {
     return this.comando(giocatore(this.idMaster), c);
+  }
+
+  /**
+   * Aggiunge le coppie già uscite nelle serate precedenti (memoria del telefono del Master),
+   * così la stanza pesca prima le parole mai viste. Le coppie che non esistono più si scartano.
+   */
+  ricordaCoppie(ids: readonly string[]): void {
+    const usate = new Set(this.stato.coppieUsate.filter(coppiaEsiste));
+    for (const id of ids) if (coppiaEsiste(id)) usate.add(id);
+    this.stato = { ...this.stato, coppieUsate: [...usate] };
   }
 
   /** Se il turno a tempo è scaduto lo chiude. Restituisce true se lo stato è cambiato. */

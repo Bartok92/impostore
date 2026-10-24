@@ -8,6 +8,8 @@ import type { ArchivioHost } from './host';
 export const archivioIdb: ArchivioHost = {
   salvaPartita: (codice, dati) => set(`stanza:${codice}`, dati),
   caricaPartita: (codice) => get<string>(`stanza:${codice}`),
+  coppieUsate: async () => (await get<string[]>('coppieUsate')) ?? [],
+  salvaCoppieUsate: (ids) => set('coppieUsate', ids),
 };
 
 export interface StanzaSalvata {

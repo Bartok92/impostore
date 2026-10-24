@@ -12,6 +12,9 @@ import { Emettitore, type Ascoltatori, type CanaleVersoOspite, type DatiIngresso
 export interface ArchivioHost {
   salvaPartita(codice: string, dati: string): Promise<void>;
   caricaPartita(codice: string): Promise<string | undefined>;
+  /** Le coppie di parole già uscite su questo telefono, in tutte le serate. */
+  coppieUsate(): Promise<string[]>;
+  salvaCoppieUsate(ids: string[]): Promise<void>;
 }
 
 /** Chi ospita la partita si presenta alla rete con questo nome: gli ospiti lo trovano dal codice. */
@@ -30,6 +33,7 @@ export class HostLocale implements Trasporto {
   private collegamenti = new Map<CanaleVersoOspite, Collegamento>();
   private salvataggio: ReturnType<typeof setTimeout> | null = null;
   private orologio: ReturnType<typeof setInterval>;
+  private memoriaSalvata: readonly string[] | null = null;
   /** La rete (PeerJS) è pronta a ricevere gli ospiti? */
   reteAperta = false;
 
@@ -161,5 +165,11 @@ export class HostLocale implements Trasporto {
     if (this.salvataggio) clearTimeout(this.salvataggio);
     this.salvataggio = null;
     await this.archivio.salvaPartita(this.stanza.codice, this.stanza.serializza());
+    // La memoria delle parole uscite vale per tutte le serate di questo telefono.
+    const usate = this.stanza.stato.coppieUsate;
+    if (usate !== this.memoriaSalvata) {
+      this.memoriaSalvata = usate;
+      await this.archivio.salvaCoppieUsate(usate);
+    }
   }
 }
