@@ -3,6 +3,7 @@
 - Parla in italiano; interfaccia e nomi di dominio in italiano (codice: identificatori in italiano per il dominio).
 - Le regole di gioco sono in `RULES.md`: è la fonte di verità del motore. Se cambi una regola, aggiorna prima RULES.md.
 - Architettura (scelta dell'utente, come Lupus in Tabula): **il telefono del Master fa da server** (WebRTC via PeerJS, app statica su GitHub Pages). Niente server Node.
+- Online: https://bartok92.github.io/impostore/ (repo `Bartok92/impostore`): ogni push su `main` esegue i test e ripubblica.
 - Il **Master gioca anche lui**: è un giocatore con id `stato.idMaster`; i comandi riservati controllano `attore.id === idMaster`.
 - Il motore (`packages/engine`) è puro: niente I/O, niente `Math.random` né `Date.now` (casualità e ora arrivano dal `Contesto`).
 - La logica della partita ospitata è `Stanza` (engine), usata da `packages/client/src/rete/p2p/host.ts`. Cambia lì, non duplicare.

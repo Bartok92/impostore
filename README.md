@@ -1,5 +1,7 @@
 # Impostore – app da cellulare
 
+**👉 Gioca: https://bartok92.github.io/impostore/**
+
 **Tutti hanno la stessa parola. Quasi tutti.**
 
 Party game di parole e bluff: il **Master** crea la stanza, gli amici **scansionano il QR** (o ricevono l'invito su WhatsApp) e giocano ciascuno dal proprio telefono. Regole complete e modalità speciali: [RULES.md](RULES.md).
