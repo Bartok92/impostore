@@ -1,0 +1,90 @@
+@import 'tailwindcss';
+/* Font inclusi nel pacchetto (funzionano offline). */
+@import '@fontsource/unbounded/latin-500.css';
+@import '@fontsource/unbounded/latin-700.css';
+@import '@fontsource/unbounded/latin-800.css';
+@import '@fontsource/dm-sans/latin-400.css';
+@import '@fontsource/dm-sans/latin-500.css';
+@import '@fontsource/dm-sans/latin-700.css';
+
+/* ——— Token del design (tela "Impostore") ——— */
+@theme {
+  --font-titolo: 'Unbounded', system-ui, sans-serif;
+  --font-testo: 'DM Sans', system-ui, sans-serif;
+
+  --color-fondo: #110e1f;
+  --color-cerchio: #1c1733;
+  --color-superficie: #1c1830;
+  --color-superficie-2: #2a2445;
+  --color-bordo: #3a3358;
+  --color-bordo-acceso: #4a4270;
+  --color-testo: #f4f1ff;
+  --color-tenue: #b8b2d6;
+  --color-chiaro: #d6d1ee;
+  --color-spento: #8f88ae;
+
+  /* Un colore per ruolo: giallo detective, corallo impostore, bianco Mr. White. */
+  --color-detective: #ffd23f;
+  --color-detective-chiaro: #ffe27a;
+  --color-impostore: #ff5470;
+  --color-mrwhite: #f4f1ff;
+  --color-inchiostro: #110e1f;
+
+  --color-ciano: #4cc9f0;
+  --color-viola: #9b8cff;
+  --color-verde: #7ce3a8;
+  --color-whatsapp: #25d366;
+  --color-whatsapp-scuro: #0b2a17;
+}
+
+html,
+body {
+  background: var(--color-fondo);
+  color: var(--color-testo);
+  font-family: var(--font-testo);
+  -webkit-tap-highlight-color: transparent;
+  overscroll-behavior-y: none;
+}
+
+button {
+  cursor: pointer;
+}
+button:disabled {
+  cursor: default;
+}
+
+:focus-visible {
+  outline: 3px solid var(--color-detective);
+  outline-offset: 2px;
+}
+/* I campi di testo mostrano il fuoco con il loro bordo colorato. */
+input:focus-visible {
+  outline: none;
+}
+
+/* ——— Animazioni ——— */
+@keyframes compari {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: none; }
+}
+@keyframes gira {
+  from { opacity: 0; transform: perspective(900px) rotateY(80deg) scale(0.96); }
+  to { opacity: 1; transform: perspective(900px) rotateY(0) scale(1); }
+}
+@keyframes pulsa {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.45; }
+}
+@keyframes coriandolo {
+  0% { transform: translateY(-20px) rotate(0); opacity: 0; }
+  10% { opacity: 1; }
+  100% { transform: translateY(110vh) rotate(540deg); opacity: 0.9; }
+}
+.compari { animation: compari 0.35s ease-out both; }
+.gira { animation: gira 0.55s cubic-bezier(0.2, 0.8, 0.2, 1) both; }
+.pulsa { animation: pulsa 1.4s ease-in-out infinite; }
+.coriandolo { animation: coriandolo linear infinite; }
+
+@media (prefers-reduced-motion: reduce) {
+  .compari, .gira, .pulsa, .coriandolo { animation: none; }
+}
