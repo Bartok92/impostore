@@ -34,6 +34,7 @@ export const IconaLente = (p: P) => <Icona {...p}><circle cx="11" cy="11" r="7" 
 export const IconaMicrofono = (p: P) => <Icona {...p}><rect x="9" y="3" width="6" height="11" rx="3" /><path d="M5 11a7 7 0 0 0 14 0M12 18v3" /></Icona>;
 export const IconaSalta = (p: P) => <Icona {...p}><path d="M5 5l8 7-8 7zM17 5v14" /></Icona>;
 export const IconaCorona = (p: P) => <Icona {...p}><path d="M3 8l4 4 5-7 5 7 4-4-2 11H5z" /></Icona>;
+export const IconaFiamma = (p: P) => <Icona {...p}><path d="M12 22a7 7 0 0 0 7-7c0-4-3-6.5-4-10-2.5 2-3.5 4-3.5 6.5-1-.8-1.8-2-2-3.5C7.5 10 5 12.3 5 15a7 7 0 0 0 7 7z" /></Icona>;
 
 export function IconaPlay({ size = 20 }: P) {
   return (

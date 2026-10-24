@@ -198,7 +198,8 @@ function esegui(s: StatoStanza, attore: Attore, c: Comando, ctx: Contesto): stri
 // ——— Inizio partita ———
 
 function scegliCoppia(s: StatoStanza, casuale: Casuale) {
-  const cats = s.impostazioni.categoria === 'casuale' ? CATEGORIE : [categoria(s.impostazioni.categoria)];
+  // "Casuale" pesca da tutte le categorie tranne quelle per adulti, che vanno scelte apposta.
+  const cats = s.impostazioni.categoria === 'casuale' ? CATEGORIE.filter((c) => !c.adulti) : [categoria(s.impostazioni.categoria)];
   const tutte = cats.flatMap((c) => c.coppie.map((coppia, i) => ({ cat: c.id, id: idCoppia(c.id, i), coppia })));
   let libere = tutte.filter((x) => !s.coppieUsate.includes(x.id));
   if (libere.length === 0) {

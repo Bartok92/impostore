@@ -27,11 +27,14 @@ export function paroleUguali(tentativo: string, parola: string): boolean {
   return a === b || (b.length >= 5 && distanza(a, b) <= 1);
 }
 
-/** L'indizio contiene la parola segreta? ("spiaggia libera" con parola "spiaggia" → sì) */
+/**
+ * L'indizio contiene la parola segreta? ("spiaggia libera" con parola "spiaggia" → sì)
+ * Dentro altre parole si cerca solo dalle 4 lettere in su: "ex" non deve bloccare "sexy", né "re" bloccare "torre".
+ */
 export function contieneParola(indizio: string, parola: string): boolean {
   const p = normalizzaParola(parola);
   if (!p) return false;
-  return indizio.split(/\s+/).some((pezzo) => paroleUguali(pezzo, parola)) || normalizzaParola(indizio).includes(p);
+  return indizio.split(/\s+/).some((pezzo) => paroleUguali(pezzo, parola)) || (p.length >= 4 && normalizzaParola(indizio).includes(p));
 }
 
 /** Pulisce un testo scritto da un giocatore: spazi in eccesso via, lunghezza massima. */

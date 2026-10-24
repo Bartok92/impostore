@@ -1,14 +1,26 @@
-import type { ReactNode } from 'react';
+import { useState, type ReactNode } from 'react';
 import {
   CATEGORIE, composizione, maxInfiltrati, problemiComposizione, SECONDI_POSSIBILI,
   type Impostazioni, type SceltaCategoria, type Vista,
 } from '@impostore/engine';
-import { Interruttore, Pulsante, PulsanteIcona, Schermo } from '../ds/componenti';
-import { IconaFantasma, IconaIndietro, IconaOrologio, IconaPlay, IconaRipeti, IconaScambia } from '../ds/icone';
+import { Foglio, Interruttore, Pulsante, PulsanteIcona, Schermo } from '../ds/componenti';
+import { IconaFantasma, IconaFiamma, IconaIndietro, IconaOrologio, IconaPlay, IconaRipeti, IconaScambia } from '../ds/icone';
 import { useApp } from '../store';
 import { plurale } from '../utilita';
 
-const SCELTE: { id: SceltaCategoria; nome: string }[] = [{ id: 'casuale', nome: 'Casuale' }, ...CATEGORIE.map((c) => ({ id: c.id, nome: c.nome }))];
+const SCELTE: { id: SceltaCategoria; nome: string; adulti?: boolean; esplicita?: boolean }[] = [
+  { id: 'casuale', nome: 'Casuale' },
+  ...CATEGORIE.map((c) => ({ id: c.id, nome: c.nome, adulti: c.adulti, esplicita: c.esplicita })),
+];
+
+/** Bollino "18+" delle categorie per adulti. */
+export function Bollino18({ invertito }: { invertito?: boolean }) {
+  return (
+    <span aria-hidden="true" className={`rounded-md px-1.5 py-px text-[10px] font-extrabold leading-tight ${invertito ? 'bg-inchiostro text-impostore' : 'bg-impostore text-inchiostro'}`}>
+      18+
+    </span>
+  );
+}
 
 export function Modalita({ v, indietro }: { v: Vista; indietro: () => void }) {
   const invia = useApp((s) => s.invia);
@@ -19,6 +31,7 @@ export function Modalita({ v, indietro }: { v: Vista; indietro: () => void }) {
   const problemi = problemiComposizione(n, imp);
   const minImpostori = imp.mrWhite ? 0 : 1;
   const maxImpostori = Math.max(minImpostori, maxInfiltrati(n) - (imp.mrWhite ? 1 : 0));
+  const [chiediConferma, setChiediConferma] = useState(false);
 
   return (
     <Schermo className="gap-[22px]">
@@ -34,20 +47,55 @@ export function Modalita({ v, indietro }: { v: Vista; indietro: () => void }) {
         <div className="flex flex-wrap gap-2">
           {SCELTE.map((c) => {
             const scelta = imp.categoria === c.id;
+            const colori = c.adulti
+              ? scelta ? 'border-impostore bg-impostore text-inchiostro' : 'border-impostore/60 text-impostore'
+              : scelta ? 'border-detective bg-detective text-inchiostro' : 'border-bordo text-testo';
             return (
               <button
                 key={c.id}
                 type="button"
                 aria-pressed={scelta}
-                onClick={() => cambia({ categoria: c.id })}
-                className={`h-10 rounded-full border-[1.5px] px-4 text-sm font-bold ${scelta ? 'border-detective bg-detective text-inchiostro' : 'border-bordo text-testo'}`}
+                aria-label={c.adulti ? `${c.nome}, solo per adulti` : undefined}
+                // Le parole volgari si attivano solo dopo la conferma del Master.
+                onClick={() => (c.esplicita && !scelta ? setChiediConferma(true) : cambia({ categoria: c.id }))}
+                className={`flex h-10 items-center gap-1.5 rounded-full border-[1.5px] px-4 text-sm font-bold ${colori}`}
               >
+                {c.adulti && <IconaFiamma size={16} />}
                 {c.nome}
+                {c.adulti && <Bollino18 invertito={scelta} />}
               </button>
             );
           })}
         </div>
+        {imp.categoria === 'piccante' && (
+          <p className="m-0 rounded-2xl border-[1.5px] border-impostore/60 px-4 py-3 text-[13px] leading-snug text-chiaro">
+            <b className="text-impostore">Solo per adulti.</b> Parole maliziose per le serate più piccanti: scegliete questa categoria solo se tutti al tavolo sono d'accordo. Con "Casuale" non esce mai.
+          </p>
+        )}
+        {imp.categoria === 'senzacensura' && (
+          <p className="m-0 rounded-2xl border-[1.5px] border-impostore px-4 py-3 text-[13px] leading-snug text-chiaro">
+            <b className="text-impostore">Senza censura, solo maggiorenni.</b> Parole volgari ed esplicite. Con "Casuale" non esce mai.
+          </p>
+        )}
       </section>
+
+      <Foglio aperto={chiediConferma} onChiudi={() => setChiediConferma(false)} titolo="Senza censura · 18+">
+        <p className="mb-5 mt-0 leading-relaxed text-chiaro">
+          Questa categoria contiene <b className="text-testo">parole volgari ed esplicite</b>. Attivala solo se al tavolo siete <b className="text-testo">tutti maggiorenni</b> e d'accordo.
+        </p>
+        <div className="flex flex-col gap-2.5">
+          <Pulsante
+            variante="corallo"
+            onClick={() => {
+              setChiediConferma(false);
+              cambia({ categoria: 'senzacensura' });
+            }}
+          >
+            Siamo tutti maggiorenni: attiva
+          </Pulsante>
+          <Pulsante variante="contornoTesto" onClick={() => setChiediConferma(false)}>Annulla</Pulsante>
+        </div>
+      </Foglio>
 
       <section className="flex items-center justify-between rounded-[20px] bg-superficie px-4 py-3.5">
         <div className="flex flex-col gap-0.5">

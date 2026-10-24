@@ -1,12 +1,16 @@
 // Le coppie di parole: la prima e la seconda sono "vicine" ma diverse.
 // A ogni partita si sorteggia quale delle due va ai detective e quale all'impostore.
 
-export type IdCategoria = 'cibo' | 'luoghi' | 'animali' | 'oggetti' | 'mestieri' | 'sport' | 'personaggi';
+export type IdCategoria = 'cibo' | 'luoghi' | 'animali' | 'oggetti' | 'mestieri' | 'sport' | 'personaggi' | 'piccante' | 'senzacensura';
 export type SceltaCategoria = IdCategoria | 'casuale';
 
 export interface Categoria {
   id: IdCategoria;
   nome: string;
+  /** Solo per adulti: non esce mai con "Casuale", va scelta apposta. */
+  adulti?: boolean;
+  /** Parole volgari ed esplicite: il Master conferma che al tavolo sono tutti maggiorenni. */
+  esplicita?: boolean;
   coppie: readonly (readonly [string, string])[];
 }
 
@@ -97,6 +101,34 @@ export const CATEGORIE: readonly Categoria[] = [
       ['ladro', 'truffatore'], ['orco', 'gigante'], ['unicorno', 'pegaso'], ['elfo', 'folletto'],
       ['re', 'imperatore'], ['lupo mannaro', 'yeti'], ['clown', 'mimo'], ['babbo natale', 'befana'],
       ['robot', 'cyborg'], ['angelo', 'diavolo'],
+    ],
+  },
+  {
+    id: 'piccante',
+    nome: 'Sexy & Hot',
+    adulti: true,
+    coppie: [
+      ['bacio', 'carezza'], ['manette', 'benda sugli occhi'], ['massaggio', 'solletico'], ['lingerie', 'costume da bagno'],
+      ['idromassaggio', 'sauna'], ['spogliarello', 'burlesque'], ['tacchi a spillo', 'stivali'], ['reggicalze', 'calze a rete'],
+      ['champagne', 'prosecco'], ['succhiotto', 'morso'], ['flirt', 'corteggiamento'], ['seduzione', 'tentazione'],
+      ['motel', 'suite'], ['candele', 'petali di rosa'], ['ex', 'amante'], ['appuntamento al buio', 'speed date'],
+      ['occhiolino', 'sguardo'], ['coccole', 'abbraccio'], ['pomiciata', 'limone'], ['gelosia', 'tradimento'],
+      ['luna di miele', 'fuga romantica'], ['tango', 'salsa'], ['perizoma', 'bikini'], ['rossetto', 'profumo'],
+      ['kamasutra', 'tantra'], ['strip poker', 'obbligo o verità'], ['sexting', 'videochiamata'], ['panna montata', 'cioccolato fuso'],
+    ],
+  },
+  {
+    id: 'senzacensura',
+    nome: 'Senza censura',
+    adulti: true,
+    esplicita: true,
+    coppie: [
+      ['cazzo', 'fica'], ['pompino', 'leccata'], ['tette', 'culo'], ['scopata', 'sveltina'],
+      ['vibratore', 'dildo'], ['preservativo', 'pillola'], ['orgasmo', 'eiaculazione'], ['sessantanove', 'pecorina'],
+      ['sega', 'ditalino'], ['porno', 'webcam erotica'], ['capezzoli', 'clitoride'], ['orgia', 'scambio di coppia'],
+      ['bondage', 'sculacciata'], ['palle', 'pisello'], ['sperma', 'lubrificante'], ['arrapato', 'eccitato'],
+      ['trombamico', 'avventura di una notte'], ['erezione', 'viagra'], ['cowgirl', 'missionario'], ['strip club', 'sexy shop'],
+      ['sesso anale', 'sesso orale'], ['gemito', 'ansimare'], ['sesso in macchina', 'sesso in spiaggia'], ['pornostar', 'spogliarellista'],
     ],
   },
 ];

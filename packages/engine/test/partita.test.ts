@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import {
-  casualeDaSeme, giocatore, maxInfiltrati, paroleUguali, problemiComposizione, Stanza, validaComando, vistaPer,
+  casualeDaSeme, contieneParola, giocatore, maxInfiltrati, paroleUguali, problemiComposizione, Stanza, validaComando, vistaPer,
   IMPOSTAZIONI_INIZIALI, PUNTI, type Comando, type IdGiocatore, type Impostazioni, type Ruolo,
 } from '../src/index.js';
 
@@ -102,6 +102,22 @@ describe('carte e segreti', () => {
     const imp = t.conRuolo('impostore')[0]!;
     expect(t.vista(imp).partita!.mia).toEqual({ ruolo: 'detective', parola: t.p.parolaImpostore, inGioco: true });
     expect(JSON.stringify(t.vista(imp))).not.toContain('"impostore"');
+  });
+
+  it('le categorie 18+ escono solo se scelte apposta, mai con "Casuale"', () => {
+    const t = tavolo(['Giulia', 'Luca', 'Marco']);
+    for (let i = 0; i < 200; i++) {
+      t.master({ tipo: 'avviaPartita' });
+      expect(['piccante', 'senzacensura']).not.toContain(t.p.categoria);
+      t.master({ tipo: 'tornaAllaLobby' });
+    }
+    for (const cat of ['piccante', 'senzacensura'] as const) {
+      t.master({ tipo: 'impostaImpostazioni', impostazioni: { categoria: cat } });
+      t.master({ tipo: 'avviaPartita' });
+      expect(t.p.categoria).toBe(cat);
+      expect(t.vista('Luca').partita!.categoria).toBe(cat);
+      t.master({ tipo: 'tornaAllaLobby' });
+    }
   });
 
   it('le coppie di parole non si ripetono nella stessa stanza', () => {
@@ -358,5 +374,13 @@ describe('confronto delle parole', () => {
     expect(paroleUguali('spiagia', 'spiaggia')).toBe(true);
     expect(paroleUguali('lago', 'mago')).toBe(false);
     expect(paroleUguali('', 'mare')).toBe(false);
+  });
+
+  it('la propria parola si riconosce anche dentro l\'indizio, ma non le parole cortissime', () => {
+    expect(contieneParola('spiaggia libera', 'spiaggia')).toBe(true);
+    expect(contieneParola('pizzeriadasotto', 'pizzeria')).toBe(true);
+    expect(contieneParola('EX', 'ex')).toBe(true);
+    expect(contieneParola('sexy', 'ex')).toBe(false);
+    expect(contieneParola('torre', 're')).toBe(false);
   });
 });

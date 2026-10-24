@@ -1,12 +1,12 @@
 import { useEffect, useState } from 'react';
 import QRCode from 'qrcode';
-import { composizione, nomeCategoria, problemiComposizione, type PacchettoVista, type Vista } from '@impostore/engine';
+import { categoria, composizione, nomeCategoria, problemiComposizione, type PacchettoVista, type Vista } from '@impostore/engine';
 import { Avatar, Pulsante, PulsanteIcona, Schermo } from '../ds/componenti';
 import { IconaAvanti, IconaCopia, IconaIndietro, IconaWhatsapp } from '../ds/icone';
 import { linkStanza, vai } from '../percorso';
 import { useApp } from '../store';
 import { coloreDi, nomeDi, plurale } from '../utilita';
-import { Modalita } from './Modalita';
+import { Bollino18, Modalita } from './Modalita';
 
 export function Lobby({ pacchetto }: { pacchetto: PacchettoVista }) {
   const [passo, setPasso] = useState<'stanza' | 'modalita'>('stanza');
@@ -147,6 +147,7 @@ function AttesaLobby({ pacchetto }: { pacchetto: PacchettoVista }) {
   const comp = composizione(v.giocatori.length, imp);
   const problemi = problemiComposizione(v.giocatori.length, imp);
   const master = nomeDi(v, v.idMaster);
+  const adulti = imp.categoria !== 'casuale' && !!categoria(imp.categoria).adulti;
   const modalita = [
     imp.mrWhite && 'Mr. White',
     imp.inconsapevole && comp.impostori > 0 && 'Impostore inconsapevole',
@@ -166,7 +167,10 @@ function AttesaLobby({ pacchetto }: { pacchetto: PacchettoVista }) {
 
       <section className="flex flex-col gap-2.5 rounded-[20px] bg-superficie p-4">
         <h2 className="m-0 text-xs font-bold uppercase tracking-[1.5px] text-tenue">Come si gioca questa volta</h2>
-        <p className="m-0">Categoria: <b>{nomeCategoria(imp.categoria)}</b></p>
+        <p className="m-0 flex items-center gap-1.5">
+          Categoria: <b className={adulti ? 'text-impostore' : ''}>{nomeCategoria(imp.categoria)}</b>
+          {adulti && <Bollino18 />}
+        </p>
         <p className="m-0">
           {problemi.length ? (
             <span className="text-tenue">{problemi[0]}</span>
